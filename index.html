@@ -9,7 +9,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -558,52 +557,13 @@
   input[type="file"]{
     display:none;
   }
-  
-  /* OCR Progress */
-  .ocr-progress{
-    display:none;
-    margin-top:12px;
-    padding:12px;
-    border:1.5px solid var(--bb-azul);
-    border-radius:10px;
-    background:#eef2ff;
-  }
-  
-  .ocr-progress.active{
-    display:block;
-  }
-  
-  .progress-bar{
-    width:100%;
-    height:8px;
-    background:#e5e7eb;
-    border-radius:4px;
-    overflow:hidden;
-    margin-top:8px;
-  }
-  
-  .progress-fill{
-    height:100%;
-    background:var(--bb-azul);
-    transition:width .3s ease;
-    width:0%;
-  }
-  
-  /* Imagem colada no campo planilha */
-  .sheet-paste img{
-    max-width:100%;
-    height:auto;
-    border-radius:8px;
-    margin:8px 0;
-    border:1.5px solid var(--border);
-  }
 </style>
 </head>
 <body>
 <header>
   <div>
     <h1>📤 Disparador — Print compacto</h1>
-    <small>Colar como planilha • Contatos salvos • Copiar mensagem com imagem • OCR de imagens</small>
+    <small>Colar como planilha • Contatos salvos • Copiar mensagem com imagem</small>
   </div>
   <div class="pill">🔒 100% local</div>
 </header>
@@ -615,14 +575,14 @@
     <section class="card">
       <h2>1️⃣ Contatos</h2>
       <div class="helper">
-        Cole tabela com cabeçalhos (flexível): <b>prefixo/pref/agência</b>, <b>nome</b>, <b>email/e-mail/mail/contato</b>. 
-        Preferência explícita pela coluna <b>"nome"</b> para o nome da pessoa.
+        Cole tabela com cabeçalhos (flexível): <b>prefixo/pref/agência</b>, <b>nome_guerra</b>, <b>email/e-mail/mail/contato</b>. 
+        Usa a coluna <b>"nome_guerra"</b> para o nome da pessoa.
       </div>
       
       <textarea id="contactsInput" placeholder="Exemplo:
-prefixo nome email
-123 Maria Clara Souza maria@empresa.com
-456 João Pedro joao@empresa.com"></textarea>
+prefixo nome_guerra email
+123 Maria maria@empresa.com
+456 João joao@empresa.com"></textarea>
       
       <div class="toolbar">
         <button class="btn" id="loadContacts">📥 Carregar contatos</button>
@@ -678,7 +638,7 @@ prefixo nome email
 
       <div id="messageBody" contenteditable="true" data-placeholder="Escreva aqui o texto após a saudação. Use os botões para negrito/itálico/sublinhado."></div>
 
-      <!-- Área de anexo de imagem -->
+      <!-- NOVO: Área de anexo de imagem -->
       <div class="helper" style="margin-top:16px">📎 <b>Anexar imagem</b> (opcional) — será enviada para todos os contatos:</div>
       
       <div class="attach-area" id="attachArea">
@@ -688,7 +648,7 @@ prefixo nome email
             clique para selecionar
           </label>
         </div>
-        <div class="small muted" style="margin-top:8px">Formatos: JPG, PNG, GIF, WebP • Cole (Ctrl+V) também funciona</div>
+        <div class="small muted" style="margin-top:8px">Formatos: JPG, PNG, GIF, WebP</div>
       </div>
       
       <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp" />
@@ -720,26 +680,14 @@ prefixo nome email
 
     <!-- Campo 3: Planilha -->
     <section class="card">
-      <h2>3️⃣ Planilha — cole texto OU imagem (Ctrl+V)</h2>
+      <h2>3️⃣ Planilha — cole aqui (Ctrl+V)</h2>
       <div class="helper">
-        Cole direto do Excel/Sheets <b>ou</b> cole uma <b>imagem de tabela</b> (OCR automático busca <b>prefixo/agência</b>). Informe um <b>Título da planilha</b> para ir no print.
+        Cole direto do Excel/Sheets. Informe um <b>Título da planilha</b> para ir no print.
       </div>
       
       <input id="sheetTitle" type="text" placeholder="📊 Título da planilha (ex.: Relatório por Prefixo)" style="margin-bottom:12px" />
       
       <div id="sheetPaste" class="sheet-paste" contenteditable="true" spellcheck="false"></div>
-      
-      <!-- Progress bar do OCR -->
-      <div class="ocr-progress" id="ocrProgress">
-        <div class="row" style="justify-content:space-between; align-items:center">
-          <span class="small"><b>🔍 Processando imagem com OCR...</b></span>
-          <span class="small" id="ocrPercent">0%</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <div class="small muted" style="margin-top:8px" id="ocrStatus">Inicializando...</div>
-      </div>
       
       <div class="row" style="margin-top:12px">
         <label style="white-space:nowrap">Linha do cabeçalho:</label>
@@ -760,7 +708,7 @@ prefixo nome email
       </div>
       
       <div class="helper">
-        <b>OCR foca em:</b> encontrar <b>prefixo</b> e/ou <b>agência</b> para associar com os contatos.
+        Associação por: <b>prefixo</b> OU <b>dependência</b> OU <b>nome_guerra</b> igual ao nome do contato.
       </div>
     </section>
 
@@ -830,11 +778,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const groupedRowsByContact = new Map();
   const imageCacheByContact = new Map();
   
-  // Estado do anexo global
+  // NOVO: Estado do anexo global
   let globalAttachment = null; // { blob, dataUrl, filename, size }
-  
-  // Imagem colada no campo planilha (mantida para não processar OCR novamente)
-  let pastedSheetImage = null;
 
   /* ========================================
      UTILITÁRIOS
@@ -883,57 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ========================================
-     OCR COM TESSERACT.JS
-  ======================================== */
-  const ocrProgress = el('#ocrProgress');
-  const ocrPercent = el('#ocrPercent');
-  const ocrStatus = el('#ocrStatus');
-  const progressFill = el('#progressFill');
-  
-  async function performOCR(imageFile) {
-    try {
-      ocrProgress.classList.add('active');
-      ocrStatus.textContent = 'Inicializando OCR...';
-      progressFill.style.width = '0%';
-      ocrPercent.textContent = '0%';
-      
-      console.log('🔍 Iniciando OCR na imagem (foco em prefixo/agência)...');
-      
-      const result = await Tesseract.recognize(
-        imageFile,
-        'por', // Português
-        {
-          logger: (m) => {
-            if (m.status === 'recognizing text') {
-              const progress = Math.round(m.progress * 100);
-              progressFill.style.width = progress + '%';
-              ocrPercent.textContent = progress + '%';
-              ocrStatus.textContent = `Reconhecendo texto... ${progress}%`;
-            }
-          }
-        }
-      );
-      
-      ocrProgress.classList.remove('active');
-      
-      const extractedText = result.data.text;
-      console.log('✅ OCR concluído. Texto extraído:', extractedText);
-      
-      if (!extractedText || extractedText.trim().length < 10) {
-        throw new Error('Texto insuficiente extraído da imagem');
-      }
-      
-      return extractedText;
-      
-    } catch (error) {
-      ocrProgress.classList.remove('active');
-      console.error('❌ Erro no OCR:', error);
-      throw error;
-    }
-  }
-
-  /* ========================================
-     ANEXO DE IMAGEM GLOBAL (CAMPO 2)
+     ANEXO DE IMAGEM GLOBAL
   ======================================== */
   const attachArea = el('#attachArea');
   const attachPreview = el('#attachPreview');
@@ -981,7 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsDataURL(file);
   }
   
-  // Drag and drop no campo de anexo
+  // Drag and drop
   attachArea.addEventListener('dragover', (e) => {
     e.preventDefault();
     attachArea.classList.add('dragover');
@@ -998,20 +893,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       processImageFile(files[0]);
-    }
-  });
-  
-  // Paste no campo de anexo
-  attachArea.addEventListener('paste', (e) => {
-    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-    
-    for (const item of items) {
-      if (item.type.indexOf('image') !== -1) {
-        e.preventDefault();
-        const imageFile = item.getAsFile();
-        processImageFile(imageFile);
-        return;
-      }
     }
   });
   
@@ -1175,12 +1056,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function refreshPreviewFromEditable() {
     try {
-      // Se há imagem colada, não processar preview de texto
-      if (pastedSheetImage) {
-        sheetPreview.style.display = 'none';
-        return;
-      }
-      
       const { headers: h, rowsAoA } = extractFromEditable(sheetPaste);
       
       if (!h.length || !rowsAoA.length) {
@@ -1198,94 +1073,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Interceptar PASTE para detectar imagens NO CAMPO PLANILHA
-  sheetPaste.addEventListener('paste', async (e) => {
-    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-    
-    for (const item of items) {
-      if (item.type.indexOf('image') !== -1) {
-        e.preventDefault();
-        
-        const imageFile = item.getAsFile();
-        console.log('📷 Imagem detectada no campo planilha, iniciando OCR...');
-        
-        // Mostrar a imagem colada
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          sheetPaste.innerHTML = `<img src="${evt.target.result}" alt="Imagem colada" />`;
-          pastedSheetImage = evt.target.result;
-        };
-        reader.readAsDataURL(imageFile);
-        
-        try {
-          showOk('Processando imagem com OCR (foco em prefixo/agência)... Aguarde.');
-          
-          const extractedText = await performOCR(imageFile);
-          
-          // Não substituir a imagem, apenas guardar o texto processado
-          console.log('📝 Texto do OCR salvo (imagem permanece visível)');
-          
-          // Processar o texto extraído
-          const lines = extractedText.split(/\r?\n/).filter(l => l.trim().length);
-          
-          if (!lines.length) {
-            throw new Error('Nenhuma linha válida extraída');
-          }
-          
-          const separator = detectDelimiter(extractedText);
-          const aoa = lines.map(line => 
-            splitFlexible(line, separator).map(x => String(x ?? '').trim())
-          );
-          
-          // Normalizar colunas
-          const maxCols = aoa.reduce((max, row) => Math.max(max, row.length), 0);
-          aoa.forEach(row => {
-            while (row.length < maxCols) row.push('');
-          });
-          
-          const headersRow = aoa[0] || [];
-          const dataRows = aoa.slice(1);
-          
-          headers = headersRow.map(x => String(x || '').trim());
-          
-          rowsAll = dataRows
-            .filter(row => row.some(value => String(value).trim() !== ''))
-            .map(row => {
-              const obj = {};
-              headers.forEach((header, idx) => {
-                obj[header] = (row[idx] ?? '').toString().trim();
-              });
-              return obj;
-            });
-          
-          console.log('📊 Dados extraídos do OCR:', { headers, rowsCount: rowsAll.length });
-          
-          imageCacheByContact.clear();
-          recountAndAutoselect();
-          
-          const statsText = `OCR: ${rowsAll.length} linha(s) • ${headers.length} coluna(s)`;
-          el('#attachStats').textContent = statsText;
-          el('#attachStats').className = 'badge success';
-          
-          el('#clearAttach').disabled = rowsAll.length === 0;
-          el('#downloadZip').disabled = rowsAll.length === 0;
-          
-          showOk('✅ OCR concluído! Dados extraídos e associados automaticamente.');
-          log('OCR concluído - imagem mantida, dados processados');
-          
-        } catch (error) {
-          showError('Falha no OCR', error.message || 'Não foi possível extrair texto da imagem');
-          logErr('Erro no OCR', error.message);
-          pastedSheetImage = null;
-          sheetPaste.innerHTML = '';
-        }
-        
-        return;
-      }
-    }
-    
-    // Se não for imagem, processar normalmente
-    pastedSheetImage = null;
+  sheetPaste.addEventListener('paste', () => {
     setTimeout(refreshPreviewFromEditable, 50);
   });
   
@@ -1307,13 +1095,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Botão "Usar dados colados"
   el('#usePasted').addEventListener('click', () => {
     try {
-      // Se já processou OCR, não precisa reprocessar
-      if (pastedSheetImage && headers.length && rowsAll.length) {
-        showOk('Dados já processados pelo OCR!');
-        log('Usando dados já processados pelo OCR');
-        return;
-      }
-      
       const { headers: h0, rowsAoA } = extractFromEditable(sheetPaste);
       
       if (!rowsAoA.length || !h0.length) {
@@ -1376,7 +1157,6 @@ document.addEventListener('DOMContentLoaded', () => {
     rowsAll = [];
     groupedRowsByContact.clear();
     imageCacheByContact.clear();
-    pastedSheetImage = null;
     
     contacts.forEach(c => c.attachCount = 0);
     
@@ -1399,22 +1179,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ========================================
      ASSOCIAÇÃO LINHAS x CONTATOS
-     FOCO: prefixo e agência
   ======================================== */
   function recountAndAutoselect() {
     groupedRowsByContact.clear();
     
-    console.log('🔍 Iniciando associação (FOCO: prefixo/agência)...');
+    console.log('🔍 Iniciando associação...');
     console.log('📋 Cabeçalhos da planilha:', headers);
     console.log('👥 Total de contatos:', contacts.length);
     console.log('📊 Total de linhas:', rowsAll.length);
     
-    // Identificar colunas relevantes - PRIORIDADE: prefixo e agência
-    const prefixCols = headers.filter(h => {
-      const k = normalizeKey(h);
-      return k.includes('prefix') || k.includes('pref') || k.includes('agên') || k.includes('agen');
-    });
-    
+    // Identificar colunas relevantes (ALTERADO: busca "nome_guerra")
     const depCols = headers.filter(h => {
       const k = normalizeKey(h);
       return k === 'dependencia' || k === 'dependência' || k.includes('depend');
@@ -1422,18 +1196,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const nameCols = headers.filter(h => {
       const k = normalizeKey(h);
-      return k === 'nome' || k.includes('nome');
+      return k === 'nome_guerra' || k.includes('nome_guerra') || k.includes('nomeguerra');
     });
     
-    console.log('🏷️ Colunas reconhecidas (prioridade: prefixo/agência):', {
+    const prefixCols = headers.filter(h => {
+      const k = normalizeKey(h);
+      return k.includes('prefix') || k.includes('pref') || k.includes('agên') || k.includes('agen');
+    });
+    
+    console.log('🏷️ Colunas reconhecidas:', {
       prefixo: prefixCols,
-      dependencia: depCols,
-      nome: nameCols
+      nome_guerra: nameCols,
+      dependencia: depCols
     });
     
     // Validação crítica
     if (!prefixCols.length && !nameCols.length && !depCols.length) {
-      const msg = 'Nenhuma coluna reconhecida na planilha. Use: "prefixo/pref/agência", "nome" ou "dependência"';
+      const msg = 'Nenhuma coluna reconhecida na planilha. Use: "prefixo/pref", "nome_guerra" ou "dependência"';
       logErr(msg);
       showError(msg, 'Verifique os nomes das colunas da planilha.');
       return;
@@ -1441,7 +1220,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let totalMatches = 0;
     
-    // Associar cada contato - PRIORIDADE: prefixo/agência
+    // Associar cada contato
     contacts.forEach((contact, idx) => {
       const matchedRows = [];
       const prefixo = String(contact.prefixo || '').trim();
@@ -1450,19 +1229,19 @@ document.addEventListener('DOMContentLoaded', () => {
       for (const row of rowsAll) {
         let matched = false;
         
-        // PRIORIDADE 1: Tentar por prefixo/agência
+        // 1. Tentar por prefixo
         if (prefixCols.length && prefixo) {
           for (const header of prefixCols) {
             const cellValue = String(row[header] ?? '').trim();
             if (equalsLoose(cellValue, prefixo)) {
               matched = true;
-              console.log(`✅ Match por prefixo/agência: ${contact.nome} (${prefixo}) ↔ ${header}="${cellValue}"`);
+              console.log(`✅ Match por prefixo: ${contact.nome} (${prefixo}) ↔ ${header}="${cellValue}"`);
               break;
             }
           }
         }
         
-        // PRIORIDADE 2: Tentar por dependência (só se não encontrou por prefixo)
+        // 2. Tentar por dependência
         if (!matched && depCols.length && nomeContato) {
           for (const header of depCols) {
             const cellValue = String(row[header] ?? '').trim();
@@ -1474,13 +1253,13 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
         
-        // PRIORIDADE 3: Tentar por nome (última opção)
+        // 3. Tentar por nome_guerra
         if (!matched && nameCols.length && nomeContato) {
           for (const header of nameCols) {
             const cellValue = String(row[header] ?? '').trim();
             if (equalsLoose(cellValue, nomeContato)) {
               matched = true;
-              console.log(`✅ Match por nome: ${nomeContato} ↔ ${header}="${cellValue}"`);
+              console.log(`✅ Match por nome_guerra: ${nomeContato} ↔ ${header}="${cellValue}"`);
               break;
             }
           }
@@ -1506,7 +1285,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     console.log(`📊 RESUMO: ${totalMatches} linha(s) associada(s) no total`);
-    log(`Associação concluída (foco prefixo/agência): ${totalMatches} linha(s) vinculada(s)`);
+    log(`Associação concluída: ${totalMatches} linha(s) vinculada(s)`);
     
     renderContacts();
     updatePreview();
@@ -1518,8 +1297,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function guessColumns(headersRow, dataRows) {
     const normalized = headersRow.map(h => normalizeKey(stripAccents(h)));
     
-    // Procurar "nome" exato primeiro
-    let iNome = normalized.findIndex(h => h === 'nome');
+    // ALTERADO: Procurar "nome_guerra" primeiro
+    let iNome = normalized.findIndex(h => 
+      h === 'nome_guerra' || h === 'nomeguerra' || h.includes('nome_guerra')
+    );
+    
+    // Fallback: se não encontrou nome_guerra, buscar apenas "nome"
+    if (iNome < 0) {
+      iNome = normalized.findIndex(h => h === 'nome');
+    }
+    
     if (iNome < 0) {
       iNome = normalized.findIndex(h => h.includes('nome'));
     }
@@ -1582,7 +1369,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Validação final
     if (iPrefixo < 0 || iNome < 0 || iEmail < 0) {
-      alert('❌ Não foi possível identificar as colunas de prefixo, nome e email.\n\nVerifique se a primeira linha contém cabeçalhos ou se os dados estão formatados corretamente.');
+      alert('❌ Não foi possível identificar as colunas de prefixo, nome_guerra e email.\n\nVerifique se a primeira linha contém cabeçalhos ou se os dados estão formatados corretamente.');
       console.error('Índices encontrados:', { iPrefixo, iNome, iEmail });
       return [];
     }
@@ -2388,7 +2175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
-    //Limpar output
+    // Limpar output
     outputContainer.innerHTML = '';
     
     // Montar cards
@@ -2465,72 +2252,65 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
-    // 2. Reprocessar planilha se houver dados (texto ou OCR já processado)
+    // 2. Reprocessar planilha se houver dados
     try {
-      // Se já tem dados processados do OCR, não precisa reprocessar
-      if (pastedSheetImage && headers.length && rowsAll.length) {
-        console.log('✅ Usando dados já processados pelo OCR');
-        imageCacheByContact.clear();
-        recountAndAutoselect();
-      } else {
-        // Processar normalmente se for texto
-        const { headers: h0, rowsAoA } = extractFromEditable(sheetPaste);
+      const { headers: h0, rowsAoA } = extractFromEditable(sheetPaste);
+      
+      if (h0?.length && rowsAoA?.length) {
+        const hdrRowValue = headerRowInput.value.trim();
+        const fullArray = [h0, ...rowsAoA];
+        let headerIndex = 0;
         
-        if (h0?.length && rowsAoA?.length) {
-          const hdrRowValue = headerRowInput.value.trim();
-          const fullArray = [h0, ...rowsAoA];
-          let headerIndex = 0;
-          
-          if (hdrRowValue) {
-            const num = parseInt(hdrRowValue, 10);
-            if (Number.isInteger(num) && num >= 1 && num <= fullArray.length) {
-              headerIndex = num - 1;
-            }
+        if (hdrRowValue) {
+          const num = parseInt(hdrRowValue, 10);
+          if (Number.isInteger(num) && num >= 1 && num <= fullArray.length) {
+            headerIndex = num - 1;
           }
-          
-          const headersRow = fullArray[headerIndex] || fullArray[0];
-          headers = headersRow.map(x => String(x || '').trim());
-          
-          const dataArray = fullArray
-            .slice(headerIndex + 1)
-            .filter(row => row.some(value => String(value).trim() !== ''));
-          
-          rowsAll = dataArray.map(row => {
-            const obj = {};
-            headers.forEach((header, idx) => {
-              obj[header] = (row[idx] ?? '').toString().trim();
-            });
-            return obj;
-          });
-          
-          imageCacheByContact.clear();
-          
-          const statsText = `Planilha: ${rowsAll.length} linha(s) • ${headers.length} coluna(s)`;
-          el('#attachStats').textContent = statsText;
-          el('#attachStats').className = 'badge success';
-          
-          el('#clearAttach').disabled = rowsAll.length === 0;
-          el('#downloadZip').disabled = rowsAll.length === 0;
-          
-          console.log('✅ Planilha reprocessada');
-          
-          recountAndAutoselect();
-        } else {
-          el('#attachStats').textContent = 'Sem dados';
-          el('#attachStats').className = 'badge warning';
         }
         
-        refreshPreviewFromEditable();
+        const headersRow = fullArray[headerIndex] || fullArray[0];
+        headers = headersRow.map(x => String(x || '').trim());
+        
+        const dataArray = fullArray
+          .slice(headerIndex + 1)
+          .filter(row => row.some(value => String(value).trim() !== ''));
+        
+        rowsAll = dataArray.map(row => {
+          const obj = {};
+          headers.forEach((header, idx) => {
+            obj[header] = (row[idx] ?? '').toString().trim();
+          });
+          return obj;
+        });
+        
+        imageCacheByContact.clear();
+        
+        const statsText = `Planilha: ${rowsAll.length} linha(s) • ${headers.length} coluna(s)`;
+        el('#attachStats').textContent = statsText;
+        el('#attachStats').className = 'badge success';
+        
+        el('#clearAttach').disabled = rowsAll.length === 0;
+        el('#downloadZip').disabled = rowsAll.length === 0;
+        
+        console.log('✅ Planilha reprocessada');
+      } else {
+        el('#attachStats').textContent = 'Sem dados';
+        el('#attachStats').className = 'badge warning';
       }
+      
+      refreshPreviewFromEditable();
     } catch (e) {
       console.error('Erro ao atualizar planilha:', e);
       showError('Falha ao atualizar dados colados', e?.message || String(e));
     }
     
-    // 3. Atualizar preview
+    // 3. Recontar associações
+    recountAndAutoselect();
+    
+    // 4. Atualizar preview
     await updatePreview();
     
-    // 4. Regenerar output
+    // 5. Regenerar output
     await regenerateOutput();
     
     log('✅ Atualização completa concluída!');
