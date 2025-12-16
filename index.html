@@ -2410,7 +2410,8 @@ document.addEventListener('DOMContentLoaded', () => {
         el('#clearAttach').disabled = rowsAll.length === 0;
         el('#downloadZip').disabled = rowsAll.length === 0;
         
-        console.log('✅ Planilha reprocessada');} else {
+        console.log('✅ Planilha reprocessada');
+      } else {
         el('#attachStats').textContent = 'Sem dados';
         el('#attachStats').className = 'badge warning';
       }
